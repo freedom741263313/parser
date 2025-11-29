@@ -80,11 +80,37 @@ const UdpDebugger = () => {
 
                 // Compare values
                 // parsedField.value vs rule.matchValue
-                // Convert both to string for comparison
-                const valA = String(parsedField.value);
-                const valB = String(rule.matchValue);
+                const valA = parsedField.value;
+                const valB = rule.matchValue;
+                
+                let isMatch = false;
 
-                if (valA === valB) {
+                // Enhanced comparison logic
+                try {
+                    // 1. Try direct string comparison first
+                    if (String(valA) === String(valB)) {
+                        isMatch = true;
+                    } 
+                    // 2. If parsed value is number/bigint, try numeric comparison
+                    else if (typeof valA === 'number' || typeof valA === 'bigint') {
+                        const numB = Number(valB); // Handles 0x prefix automatically
+                        if (!isNaN(numB)) {
+                            if (typeof valA === 'bigint') {
+                                try {
+                                    if (valA === BigInt(valB)) isMatch = true;
+                                } catch {}
+                            } else {
+                                if (valA === numB) isMatch = true;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Comparison error:', e);
+                }
+
+                console.log(`[AutoReply] Checking rule "${rule.name}": Field "${fieldDef.name}" = ${valA} (Expected: ${valB}) -> Match: ${isMatch}`);
+
+                if (isMatch) {
                     // Match found! Send responses
                     // @ts-ignore - handle legacy data structure where actions might be undefined
                     const actions = rule.actions || (rule.responseTemplateId ? [{ templateId: rule.responseTemplateId, delay: 0 }] : []);
