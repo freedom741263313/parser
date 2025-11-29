@@ -1,4 +1,5 @@
 import React from 'react';
+import { HashRouter as Router } from 'react-router-dom';
 import { MainLayout } from './components/MainLayout';
 import { StoreProvider } from './context/StoreContext';
 
@@ -6,7 +7,9 @@ import { StoreProvider } from './context/StoreContext';
 function App() {
   return (
     <StoreProvider>
-      <MainLayout />
+      <Router>
+        <MainLayout />
+      </Router>
     </StoreProvider>
   );
 }
