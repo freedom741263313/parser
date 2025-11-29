@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, Save, FileCode } from 'lucide-react';
+import { Plus, Trash2, Save, FileCode, Upload, Download } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { PacketTemplate, ProtocolRule, FieldDefinition } from '../types/rule';
 import { PacketGenerator } from '../utils/generator';
@@ -7,7 +7,7 @@ import { PacketGenerator } from '../utils/generator';
 const generator = new PacketGenerator();
 
 export const TemplateManager = () => {
-  const { rules, templates, saveTemplates, enums } = useStore();
+  const { rules, templates, saveTemplates, enums, importData, exportData } = useStore();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<PacketTemplate | null>(null);
 
@@ -46,6 +46,16 @@ export const TemplateManager = () => {
     const newTemplates = templates.map(t => t.id === editingTemplate.id ? editingTemplate : t);
     saveTemplates(newTemplates);
     alert('模版已保存');
+  };
+
+  const handleImport = async () => {
+    if (confirm('导入将合并现有数据 (包含模版和自动回复规则). 继续?')) {
+        await importData();
+    }
+  };
+
+  const handleExport = async () => {
+      await exportData();
   };
 
   const selectedRule = useMemo(() => 
@@ -106,11 +116,32 @@ export const TemplateManager = () => {
     <div className="flex h-full gap-4">
       {/* List */}
       <div className="w-64 border-r pr-4 flex flex-col gap-2">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">模版列表</h3>
-          <button onClick={handleAdd} className="p-1 hover:bg-accent rounded">
-            <Plus className="h-4 w-4" />
-          </button>
+        <div className="flex flex-col gap-2 mb-2">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold flex items-center gap-2">
+                <FileCode className="h-4 w-4" />
+                模版列表
+            </h3>
+            <button onClick={handleAdd} className="p-1 hover:bg-accent rounded" title="新建模版">
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button 
+                onClick={handleImport}
+                className="flex-1 flex items-center justify-center gap-1 text-xs border rounded px-2 py-1 hover:bg-accent"
+                title="导入模版"
+            >
+                <Upload className="h-3 w-3" /> 导入
+            </button>
+            <button 
+                onClick={handleExport}
+                className="flex-1 flex items-center justify-center gap-1 text-xs border rounded px-2 py-1 hover:bg-accent"
+                title="导出模版"
+            >
+                <Download className="h-3 w-3" /> 导出
+            </button>
+          </div>
         </div>
         <div className="flex-1 overflow-auto space-y-1">
             {templates.map(t => (

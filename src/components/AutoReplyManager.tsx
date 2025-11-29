@@ -12,7 +12,16 @@ export const AutoReplyManager = () => {
     if (selectedRuleId) {
       const found = replyRules.find(r => r.id === selectedRuleId);
       if (found) {
-        setEditingRule(JSON.parse(JSON.stringify(found)));
+        const rule = JSON.parse(JSON.stringify(found));
+        // Migration for old rules
+        if (!rule.actions) {
+            // @ts-ignore - responseTemplateId might exist on old objects
+            rule.actions = rule.responseTemplateId 
+                // @ts-ignore
+                ? [{ templateId: rule.responseTemplateId, delay: 0 }]
+                : [];
+        }
+        setEditingRule(rule);
       }
     } else {
       setEditingRule(null);
@@ -27,7 +36,7 @@ export const AutoReplyManager = () => {
       matchProtocolId: rules[0]?.id || '',
       matchFieldId: '',
       matchValue: '',
-      responseTemplateId: templates[0]?.id || ''
+      actions: []
     };
     saveReplyRules([...replyRules, newRule]);
     setSelectedRuleId(newRule.id);
@@ -45,6 +54,30 @@ export const AutoReplyManager = () => {
     const newRules = replyRules.map(r => r.id === editingRule.id ? editingRule : r);
     saveReplyRules(newRules);
     alert('规则已保存');
+  };
+
+  const handleAddAction = () => {
+      if (!editingRule) return;
+      setEditingRule({
+          ...editingRule,
+          actions: [
+              ...editingRule.actions,
+              { templateId: templates[0]?.id || '', delay: 0 }
+          ]
+      });
+  };
+
+  const handleUpdateAction = (index: number, field: 'templateId' | 'delay', value: any) => {
+      if (!editingRule) return;
+      const newActions = [...editingRule.actions];
+      newActions[index] = { ...newActions[index], [field]: value };
+      setEditingRule({ ...editingRule, actions: newActions });
+  };
+
+  const handleDeleteAction = (index: number) => {
+      if (!editingRule) return;
+      const newActions = editingRule.actions.filter((_, i) => i !== index);
+      setEditingRule({ ...editingRule, actions: newActions });
   };
 
   const selectedProtocol = rules.find(r => r.id === editingRule?.matchProtocolId);
@@ -156,20 +189,52 @@ export const AutoReplyManager = () => {
               </div>
 
               <div className="bg-muted/30 p-4 rounded-lg border space-y-4">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">响应动作</h4>
+                <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">响应动作</h4>
+                    <button onClick={handleAddAction} className="p-1 hover:bg-primary/10 rounded text-primary flex items-center gap-1 text-xs">
+                        <Plus className="h-3 w-3" /> 添加动作
+                    </button>
+                </div>
                 
-                <div>
-                    <label className="text-xs font-medium block mb-1">响应模版</label>
-                    <select
-                        className="w-full border rounded p-2 text-sm bg-background"
-                        value={editingRule.responseTemplateId}
-                        onChange={(e) => setEditingRule({...editingRule, responseTemplateId: e.target.value})}
-                    >
-                        <option value="">选择模版</option>
-                        {templates.map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                    </select>
+                <div className="space-y-2">
+                    {editingRule.actions.map((action, index) => (
+                        <div key={index} className="flex gap-2 items-center bg-background p-2 rounded border">
+                            <div className="flex-1">
+                                <select
+                                    className="w-full border rounded p-1 text-sm bg-background"
+                                    value={action.templateId}
+                                    onChange={(e) => handleUpdateAction(index, 'templateId', e.target.value)}
+                                >
+                                    <option value="">选择模版</option>
+                                    {templates.map(t => (
+                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="w-24">
+                                <input
+                                    type="number"
+                                    className="w-full border rounded p-1 text-sm bg-background"
+                                    value={action.delay}
+                                    onChange={(e) => handleUpdateAction(index, 'delay', parseInt(e.target.value) || 0)}
+                                    placeholder="延迟(ms)"
+                                    title="延迟时间 (毫秒)"
+                                />
+                            </div>
+                            <span className="text-xs text-muted-foreground">ms</span>
+                            <button 
+                                onClick={() => handleDeleteAction(index)}
+                                className="p-1 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+                        </div>
+                    ))}
+                    {editingRule.actions.length === 0 && (
+                        <div className="text-center text-xs text-muted-foreground py-4">
+                            无响应动作, 请点击上方添加
+                        </div>
+                    )}
                 </div>
               </div>
             </div>

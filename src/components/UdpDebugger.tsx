@@ -85,17 +85,35 @@ const UdpDebugger = () => {
                 const valB = String(rule.matchValue);
 
                 if (valA === valB) {
-                    // Match found! Send response
-                    const responseTemplate = templates.find(t => t.id === rule.responseTemplateId);
-                    if (responseTemplate) {
-                        const responseProtocol = rules.find(r => r.id === responseTemplate.protocolId);
-                        if (responseProtocol) {
-                            const hex = generator.generate(responseProtocol, responseTemplate.values);
-                            send(msg.remoteAddress, msg.remotePort, hex); // Reply to sender
-                            console.log(`[AutoReply] Triggered rule "${rule.name}", sent template "${responseTemplate.name}"`);
-                            return; // Stop after first match? Or continue? Usually first match wins.
+                    // Match found! Send responses
+                    // @ts-ignore - handle legacy data structure where actions might be undefined
+                    const actions = rule.actions || (rule.responseTemplateId ? [{ templateId: rule.responseTemplateId, delay: 0 }] : []);
+                    
+                    actions.forEach((action: any) => {
+                        const responseTemplate = templates.find(t => t.id === action.templateId);
+                        if (responseTemplate) {
+                            const responseProtocol = rules.find(r => r.id === responseTemplate.protocolId);
+                            if (responseProtocol) {
+                                const sendResponse = () => {
+                                    try {
+                                        const hex = generator.generate(responseProtocol, responseTemplate.values);
+                                        send(msg.remoteAddress, msg.remotePort, hex);
+                                        console.log(`[AutoReply] Triggered rule "${rule.name}", sent template "${responseTemplate.name}"`);
+                                    } catch (err) {
+                                        console.error("Failed to generate/send response", err);
+                                    }
+                                };
+
+                                if (action.delay > 0) {
+                                    setTimeout(sendResponse, action.delay);
+                                } else {
+                                    sendResponse();
+                                }
+                            }
                         }
-                    }
+                    });
+                    
+                    return; // Stop after first matching rule
                 }
             } catch (e) {
                 // Parse failed for this protocol, ignore

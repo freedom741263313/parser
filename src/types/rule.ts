@@ -56,6 +56,11 @@ export interface PacketTemplate {
   values: Record<string, any>; // fieldId -> value
 }
 
+export interface ReplyAction {
+  templateId: string;
+  delay: number; // milliseconds
+}
+
 export interface AutoReplyRule {
   id: string;
   isActive: boolean;
@@ -63,7 +68,7 @@ export interface AutoReplyRule {
   matchProtocolId: string;
   matchFieldId: string;
   matchValue: string;
-  responseTemplateId: string;
+  actions: ReplyAction[];
 }
 
 export interface ParsedField {
