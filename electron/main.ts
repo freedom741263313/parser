@@ -30,6 +30,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    title: 'UDP协议解析器',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

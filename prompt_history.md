@@ -121,3 +121,7 @@
 30. **User**: 要求系统将红框中的内容隐藏
     - **Action**: Hidden application menu bar.
     - **Details**: Updated `electron/main.ts` to set `Menu.setApplicationMenu(null)`. Created `PRD_v1.5.md` and `PROTOTYPE_v1.5.md` to document the UI change.
+
+31. **User**: 要求将红框中的内容替换为合适的软件中文名称
+    - **Action**: Updated application title.
+    - **Details**: Updated `index.html` title tag and `electron/main.ts` BrowserWindow config to "UDP协议解析器".
