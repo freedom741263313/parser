@@ -43,7 +43,7 @@ function App() {
           </div>
           
           <nav className="flex-1 py-4">
-            <NavItem to="/" icon={FileJson} label="解析器 (Parser)" />
+            <NavItem to="/" icon={FileJson} label="解析器" />
             <NavItem to="/debug" icon={Activity} label="UDP 调试" />
             <NavItem to="/rules" icon={Settings} label="规则管理" />
             <NavItem to="/enums" icon={Database} label="枚举管理" />

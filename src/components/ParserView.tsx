@@ -229,8 +229,8 @@ const ParserView = () => {
     <div className="relative flex h-full flex-col p-4 gap-4">
       {/* Toolbar */}
       <div className="flex items-center gap-4 bg-secondary/20 p-2 rounded-md border">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-muted-foreground">协议</label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-muted-foreground whitespace-nowrap">协议</label>
           <select 
             className="h-8 rounded-md border bg-background px-3 text-sm min-w-[200px]"
             value={selectedProtocolId}

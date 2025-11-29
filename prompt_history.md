@@ -45,3 +45,20 @@
 11. **User**: 重新学习工程规则
     - **Action**: Reviewed project rules, identified PRD/Prototype coverage gap, and created version 1.1 documents.
     - **Details**: Read `.trae/rules/project_rules.md`. Discovered rule regarding PRD coverage check. Analyzed `PRD.md` and `PROTOTYPE.md`, found discrepancies (Copy/Save buttons, Sample Generation details). Created `PRD_v1.1.md` and `PROTOTYPE_v1.1.md` to accurately reflect current implementation including Input Toolbar features and UI alignment. Updated `prompt_history.md`.
+
+12. **User**: 提交代码,备注修改规则文件,提交时将.trae目录内容也提交了
+    - **Action**: Committed code and documentation changes including `.trae` directory.
+    - **Details**: Ran `git add .` (which includes `.trae` as it's not in `.gitignore`) and `git commit -m "修改规则文件"`.
+
+13. **User**: 要求红框中的协议、选择框、加载示例显示在一行
+    - **Action**: Modified ParserView toolbar layout to align protocol label, select box, and load sample button horizontally.
+    - **Details**: Changed the flex container structure in `ParserView.tsx` from `flex-col` to `flex-row` (via `flex items-center gap-2`) for the protocol selector section. Added `whitespace-nowrap` to the label. Verified layout changes with tests. Updated `prompt_history.md`.
+
+14. **User**: 要求将解析器页签括号及括号内的英文删除掉
+    - **Action**: Localized the Parser tab label in the sidebar.
+    - **Details**: Updated `App.tsx` to change the label from "解析器 (Parser)" to "解析器". Verified the change in the codebase.
+
+15. **User**: 提交git,备注解析器界面调试完成
+    - **Action**: Committed changes to git with the specified message.
+    - **Details**: Updated `prompt_history.md` to include this task. Ran `git add .` and `git commit -m "解析器界面调试完成"`.
+
