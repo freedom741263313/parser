@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import UdpDebugger from '../../components/UdpDebugger';
-import { ProtocolRule } from '../../types/rule';
+import { ProtocolRule, PacketTemplate } from '../../types/rule';
 
 // Mock hooks
 const mockMessages = [
@@ -21,6 +21,18 @@ const mockRules: ProtocolRule[] = [
   }
 ];
 
+const mockTemplates: PacketTemplate[] = [
+  {
+    id: 'temp1',
+    name: 'Test Template',
+    protocolId: 'rule1',
+    values: {
+      f1: '1', // 0x01
+      f2: '2'  // 0x02
+    }
+  }
+];
+
 vi.mock('../../hooks/useUdp', () => ({
   useUdp: () => ({
     messages: mockMessages,
@@ -37,7 +49,7 @@ vi.mock('../../hooks/useStore', () => ({
   useStore: () => ({
     rules: mockRules,
     enums: [],
-    templates: [],
+    templates: mockTemplates,
     replyRules: []
   })
 }));
@@ -84,7 +96,15 @@ describe('UdpDebugger', () => {
     // Check parsed result (Rule1 matches 01 02 as 2 bytes)
     // Field1 = 0x01 = 1, Field2 = 0x02 = 2
     expect(screen.getByText('解析结果')).toBeInTheDocument();
-    expect(screen.getByText('Test Protocol')).toBeInTheDocument();
+    
+    // "Test Template" appears in the template selector dropdown AND the parsed result badge
+    // We want to verify it appears in the parsed result
+    const resultHeader = screen.getByText('解析结果');
+    // The badge is a sibling in the same container, or we can look for it nearby
+    // Structure: div > [h4(解析结果), span(Badge)]
+    const badge = resultHeader.nextElementSibling;
+    expect(badge).toHaveTextContent('Test Template');
+
     expect(screen.getByText('Field1')).toBeInTheDocument();
     expect(screen.getByText('Field2')).toBeInTheDocument();
   });

@@ -133,6 +133,7 @@ export class ParserEngine {
       }
 
       const result: ParsedField = {
+        id: field.id,
         name: field.name,
         rawHex,
         value,

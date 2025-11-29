@@ -1,17 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import { Copy, ChevronRight, ChevronDown, Check } from 'lucide-react';
 import { UdpMessage } from '../types/udp';
-import { ProtocolRule, ParsedField } from '../types/rule';
+import { ProtocolRule, ParsedField, PacketTemplate } from '../types/rule';
 import { ParserEngine } from '../utils/parser';
-import { formatHexBlock, hexToBuffer } from '../utils/hex';
+import { PacketGenerator } from '../utils/generator';
+import { formatHexBlock, hexToBuffer, cleanHex } from '../utils/hex';
 
 interface LogMessageRowProps {
   msg: UdpMessage;
   rules: ProtocolRule[];
+  templates: PacketTemplate[];
   engine: ParserEngine;
 }
 
-export const LogMessageRow: React.FC<LogMessageRowProps> = ({ msg, rules, engine }) => {
+const generator = new PacketGenerator();
+
+export const LogMessageRow: React.FC<LogMessageRowProps> = ({ msg, rules, templates, engine }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -25,43 +29,36 @@ export const LogMessageRow: React.FC<LogMessageRowProps> = ({ msg, rules, engine
   const parsedResult = useMemo(() => {
     if (!msg.data) return null;
     
-    try {
-      const buffer = hexToBuffer(msg.data);
-      
-      // Try to find a matching protocol
-      // We iterate through all custom rules to see if any parses successfully
-      for (const rule of rules) {
-        if (rule.type === 'custom') {
-          try {
-            const fields = engine.parse(buffer, rule);
-            
-            // Check if parsing was successful (no errors)
-            // Also maybe check if it consumed a reasonable amount of data or matched specific criteria?
-            // For now, if all fields are parsed without error, we assume it's a match.
-            const hasError = fields.some(f => f.error);
-            
-            // Also check if the total length of parsed fields matches the buffer length?
-            // Our parser doesn't strictly enforce total length check in the result array itself,
-            // but we can sum up the length.
-            const totalParsedLength = fields.reduce((acc, f) => acc + (f.length || 0), 0);
-            
-            if (!hasError && totalParsedLength > 0) {
-               // If strict match is needed:
-               // if (totalParsedLength === buffer.length)
-               // But often protocols have padding or variable length, let's be lenient for now or check strictness.
-               // Let's assume if it parses without error, it's a candidate.
-               return { ruleName: rule.name, fields };
-            }
-          } catch (e) {
-            // Continue to next rule
-          }
+    const msgHex = cleanHex(msg.data);
+
+    // Iterate through all templates to find a match
+    for (const template of templates) {
+      const rule = rules.find(r => r.id === template.protocolId);
+      if (!rule) continue;
+
+      try {
+        // Generate hex from template values
+        const templateHex = generator.generate(rule, template.values);
+        
+        // console.log('Comparing:', { t: cleanHex(templateHex), m: msgHex });
+
+        // Compare generated hex with message hex
+        if (cleanHex(templateHex).toLowerCase() === msgHex.toLowerCase()) {
+          // If match, parse the message to get field details
+          const buffer = hexToBuffer(msg.data);
+          const fields = engine.parse(buffer, rule);
+          
+          return { ruleName: template.name, fields };
         }
-      }
-    } catch (e) {
-      console.error("Error preparing parse", e);
+      } catch (e) {
+         // Ignore errors during generation (e.g. incomplete template)
+         // console.error('Generator error:', e);
+         continue;
+       }
     }
+    
     return null;
-  }, [msg.data, rules, engine]);
+  }, [msg.data, rules, templates, engine]);
 
   return (
     <>

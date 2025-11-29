@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FileJson, Activity, Settings, Database, Layout, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileJson, Activity, Settings, Database, Layout, ChevronLeft, ChevronRight, Network } from 'lucide-react';
 import clsx from 'clsx';
 
 import ParserView from './ParserView';
@@ -44,11 +44,13 @@ export function MainLayout() {
           isCollapsed ? "w-16" : "w-64"
         )}
       >
-        <div className={clsx("h-16 border-b flex items-center px-4", isCollapsed ? "justify-center" : "justify-start gap-2")}>
-          <Layout className="h-6 w-6 shrink-0" />
+        <div className={clsx("h-16 border-b flex items-center px-4", isCollapsed ? "justify-center" : "justify-start gap-3")}>
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <Network className="h-6 w-6 shrink-0 text-primary" />
+          </div>
           {!isCollapsed && (
-            <h1 className="text-lg font-bold whitespace-nowrap overflow-hidden">
-              UDP Parser
+            <h1 className="text-lg font-bold whitespace-nowrap overflow-hidden bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              UDP协议解析器
             </h1>
           )}
         </div>

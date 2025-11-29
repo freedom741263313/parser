@@ -1,4 +1,9 @@
 
-35. **User**: 提交git
-    - **Action**: Committed changes to git with a descriptive message.
-    - **Details**: Ran `git add .` and `git commit -m "feat: 增强UDP调试日志功能(复制/格式化/自动解析)并更新文档"`.
+36. **User**: 要求重新设计这里的显示
+    - **Action**: Redesigned the sidebar header branding.
+    - **Details**: 
+        - Changed text from "UDP Parser" to "UDP协议解析器".
+        - Replaced generic `Layout` icon with `Network` icon.
+        - Added a subtle background `bg-primary/10` to the icon container.
+        - Applied gradient text effect `bg-gradient-to-r from-primary to-blue-600` to the title.
+        - Updated `MainLayout.tsx` and `App.test.tsx` (to match new Chinese title).

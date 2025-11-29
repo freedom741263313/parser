@@ -8,8 +8,8 @@ describe('App Sidebar', () => {
     render(<App />);
 
     // Initial state: Sidebar should be expanded
-    // "UDP Parser" title should be visible
-    expect(screen.getByText('UDP Parser')).toBeInTheDocument();
+    // "UDP协议解析器" title should be visible
+    expect(screen.getByText('UDP协议解析器')).toBeInTheDocument();
     
     // Find the toggle button (we will add aria-label="Toggle Sidebar")
     // Note: Since we haven't implemented it yet, this test will fail if run now.

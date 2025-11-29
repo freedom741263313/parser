@@ -72,6 +72,7 @@ export interface AutoReplyRule {
 }
 
 export interface ParsedField {
+  id?: string; // ID from FieldDefinition
   name: string;
   rawHex: string;
   value: any;

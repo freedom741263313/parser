@@ -321,7 +321,7 @@ const UdpDebugger = () => {
                             </thead>
                             <tbody className="divide-y">
                                 {messages.map((msg) => (
-                                    <LogMessageRow key={msg.id} msg={msg} rules={rules} engine={engine} />
+                                    <LogMessageRow key={msg.id} msg={msg} rules={rules} templates={templates} engine={engine} />
                                 ))}
                                 {messages.length === 0 && (
                                     <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">暂无消息</td></tr>
