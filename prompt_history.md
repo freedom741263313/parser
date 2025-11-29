@@ -70,3 +70,46 @@
     - **Action**: Updated `package.json` test script to use single run mode.
     - **Details**: Changed `"test": "vitest"` to `"test": "vitest run"`. Verified that `npm test` now exits automatically after execution.
 
+18. **User**: 要求增加UDP调试功能,可以配置本地监听端口,可以配置目标IP和端口,可以配置发送内容(Hex)
+    - **Action**: Implemented `UdpDebugger` component and Electron IPC handlers for UDP.
+    - **Details**: Created `UdpDebugger.tsx`, `useUdp.ts`, and updated `electron/main.ts` with `dgram` logic. Added `UdpDebugger.test.tsx`. Updated `PRD_v1.2.md` and `PROTOTYPE_v1.2.md`.
+
+19. **User**: 要求UDP调试功能中增加自动回复功能,可以根据接收到的数据,按照规则自动回复
+    - **Action**: Implemented auto-reply logic in `UdpDebugger.tsx` and `AutoReplyManager.tsx`.
+    - **Details**: Added `replyRules` store, implemented matching logic (protocol/field/value) in `UdpDebugger`, added management UI in `AutoReplyManager`. Updated `PRD_v1.3.md` and `PROTOTYPE_v1.3.md`.
+
+20. **User**: 要求自动回复的响应动作可以设置多个,并可以设置时间间隔
+    - **Action**: Enhanced `AutoReplyRule` to support multiple actions with delays.
+    - **Details**: Updated `rule.ts` to use `actions: ReplyAction[]`. Modified `AutoReplyManager.tsx` to manage action list. Updated `UdpDebugger.tsx` to handle `setTimeout`. Created `AutoReplyManager.test.tsx`. Updated `PRD_v1.4.md` and `PROTOTYPE_v1.4.md`.
+
+21. **User**: 要求模板可以导入和导出,导入和导出时把自动回复也导出了
+    - **Action**: Added import/export to Template Manager including auto-reply rules.
+    - **Details**: Updated `TemplateManager.tsx` with import/export buttons calling store methods. Verified `storeService` handles global data. Created `TemplateManager.test.tsx`.
+
+22. **User**: 要求模版的导入导出样式和规则管理的导入导出一致
+    - **Action**: Aligned Template Manager UI with Rule Manager.
+    - **Details**: Updated `TemplateManager.tsx` to use full-width buttons with icons and matching header layout. Verified consistency.
+
+23. **User**: 提交git,自动填写备注信息
+    - **Action**: Committed changes with descriptive message.
+    - **Details**: Ran `git add .` and `git commit` with summary of features (multiple actions, import/export, UI alignment).
+
+24. **User**: 将程序打包为可执行文件,我要运行两个开始测试
+    - **Action**: Configured electron-builder and built the app.
+    - **Details**: Updated `package.json` build config. Ran `npm run build`. Opened two instances of the app for testing.
+
+25. **User**: 经测试自动回复功能怎么没起作用呢,消息已经接收到在日志打印了,配置了自动回复但是没有发送
+    - **Action**: Debugged and fixed auto-reply matching logic.
+    - **Details**: Enhanced `processAutoReply` in `UdpDebugger.tsx` to support numeric/hex string comparison (numeric values vs hex strings). Added debug logs. Rebuilt app.
+
+26. **User**: 模版管理中的修改模版的字段值保存成功后,自动回复时使用的还是旧值,这是为什么
+    - **Action**: Refactored state management to React Context to fix sync issues.
+    - **Details**: Created `StoreContext.tsx` and `StoreProvider`. Updated `useStore` to consume context. Wrapped `App` in provider. Fixed independent state instances problem.
+
+27. **User**: 提交git,备注自动回复调试成功
+    - **Action**: Committed fix and refactor changes.
+    - **Details**: Ran `git add .` and `git commit -m "fix: 自动回复调试成功..."`.
+
+28. **User**: 重新阅读workflow不要忘记
+    - **Action**: Reviewed workflow, updated prompt history, and verified PRD/Prototype coverage.
+    - **Details**: Saved this prompt history. Checked PRD v1.4 status.
