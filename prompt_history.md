@@ -62,3 +62,11 @@
     - **Action**: Committed changes to git with the specified message.
     - **Details**: Updated `prompt_history.md` to include this task. Ran `git add .` and `git commit -m "解析器界面调试完成"`.
 
+16. **User**: 要求导航栏提供可以把左侧导航栏收起和展示的特性
+    - **Action**: Implemented collapsible sidebar in `App.tsx` and added tests.
+    - **Details**: Added `isCollapsed` state to `App` component. Implemented toggle logic and UI updates (width change, text hiding, icon centering). Added toggle button to sidebar footer. Created `src/test/App.test.tsx` to verify collapse/expand behavior.
+
+17. **User**: 为什么运行npm test命令执行测试用例后,必须用户输入q才能退出,应该运行完自动结束,不要麻烦用户
+    - **Action**: Updated `package.json` test script to use single run mode.
+    - **Details**: Changed `"test": "vitest"` to `"test": "vitest run"`. Verified that `npm test` now exits automatically after execution.
+

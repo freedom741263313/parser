@@ -22,7 +22,7 @@ export const AutoReplyManager = () => {
   const handleAdd = () => {
     const newRule: AutoReplyRule = {
       id: crypto.randomUUID(),
-      name: 'New Reply Rule',
+      name: '新建回复规则',
       isActive: true,
       matchProtocolId: rules[0]?.id || '',
       matchFieldId: '',
@@ -34,7 +34,7 @@ export const AutoReplyManager = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Delete this rule?')) {
+    if (confirm('确认删除此规则?')) {
       saveReplyRules(replyRules.filter(r => r.id !== id));
       if (selectedRuleId === id) setSelectedRuleId(null);
     }
@@ -44,7 +44,7 @@ export const AutoReplyManager = () => {
     if (!editingRule) return;
     const newRules = replyRules.map(r => r.id === editingRule.id ? editingRule : r);
     saveReplyRules(newRules);
-    alert('Rule saved');
+    alert('规则已保存');
   };
 
   const selectedProtocol = rules.find(r => r.id === editingRule?.matchProtocolId);
@@ -55,7 +55,7 @@ export const AutoReplyManager = () => {
       <div className="w-64 border-r pr-4 flex flex-col gap-2">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-semibold flex items-center gap-2">
-            <Zap className="h-4 w-4" /> Auto Reply
+            <Zap className="h-4 w-4" /> 自动回复
           </h3>
           <button onClick={handleAdd} className="p-1 hover:bg-accent rounded">
             <Plus className="h-4 w-4" />
@@ -99,29 +99,29 @@ export const AutoReplyManager = () => {
                  <button 
                     onClick={() => setEditingRule({...editingRule, isActive: !editingRule.isActive})}
                     className="text-muted-foreground hover:text-foreground"
-                    title="Toggle Active"
+                    title="切换激活状态"
                  >
                     {editingRule.isActive ? <ToggleRight className="h-6 w-6 text-green-500" /> : <ToggleLeft className="h-6 w-6" />}
                  </button>
               </div>
               <button onClick={handleSave} className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1 rounded text-sm">
-                <Save className="h-3 w-3" /> Save
+                <Save className="h-3 w-3" /> 保存
               </button>
             </div>
 
             <div className="space-y-4 overflow-auto flex-1 pr-2">
               <div className="bg-muted/30 p-4 rounded-lg border space-y-4">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">Trigger Condition</h4>
+                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">触发条件</h4>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="text-xs font-medium block mb-1">Protocol</label>
+                        <label className="text-xs font-medium block mb-1">协议</label>
                         <select
                             className="w-full border rounded p-2 text-sm bg-background"
                             value={editingRule.matchProtocolId}
                             onChange={(e) => setEditingRule({...editingRule, matchProtocolId: e.target.value, matchFieldId: ''})}
                         >
-                            <option value="">Select Protocol</option>
+                            <option value="">选择协议</option>
                             {rules.filter(r => r.type === 'custom').map(r => (
                                 <option key={r.id} value={r.id}>{r.name}</option>
                             ))}
@@ -129,14 +129,14 @@ export const AutoReplyManager = () => {
                     </div>
 
                     <div>
-                        <label className="text-xs font-medium block mb-1">Field</label>
+                        <label className="text-xs font-medium block mb-1">字段</label>
                         <select
                             className="w-full border rounded p-2 text-sm bg-background"
                             value={editingRule.matchFieldId}
                             onChange={(e) => setEditingRule({...editingRule, matchFieldId: e.target.value})}
                             disabled={!selectedProtocol}
                         >
-                            <option value="">Select Field</option>
+                            <option value="">选择字段</option>
                             {selectedProtocol?.fields.map(f => (
                                 <option key={f.id} value={f.id}>{f.name}</option>
                             ))}
@@ -144,28 +144,28 @@ export const AutoReplyManager = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <label className="text-xs font-medium block mb-1">Match Value</label>
+                        <label className="text-xs font-medium block mb-1">匹配值</label>
                         <input
                             className="w-full border rounded p-2 text-sm bg-background"
                             value={editingRule.matchValue}
                             onChange={(e) => setEditingRule({...editingRule, matchValue: e.target.value})}
-                            placeholder="Value to match (e.g., 1, 0x01, 'ping')"
+                            placeholder="匹配值 (如 1, 0x01, 'ping')"
                         />
                     </div>
                 </div>
               </div>
 
               <div className="bg-muted/30 p-4 rounded-lg border space-y-4">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">Response Action</h4>
+                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">响应动作</h4>
                 
                 <div>
-                    <label className="text-xs font-medium block mb-1">Response Template</label>
+                    <label className="text-xs font-medium block mb-1">响应模版</label>
                     <select
                         className="w-full border rounded p-2 text-sm bg-background"
                         value={editingRule.responseTemplateId}
                         onChange={(e) => setEditingRule({...editingRule, responseTemplateId: e.target.value})}
                     >
-                        <option value="">Select Template</option>
+                        <option value="">选择模版</option>
                         {templates.map(t => (
                             <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
@@ -176,7 +176,7 @@ export const AutoReplyManager = () => {
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select or create a rule
+            请选择或创建规则
           </div>
         )}
       </div>

@@ -11,7 +11,7 @@ export function formatHex(input: string): string {
 export function hexToBuffer(input: string): Uint8Array {
   const cleaned = cleanHex(input);
   if (cleaned.length % 2 !== 0) {
-    throw new Error('Invalid hex string length');
+    throw new Error('Hex 字符串长度无效');
   }
   const bytes = new Uint8Array(cleaned.length / 2);
   for (let i = 0; i < cleaned.length; i += 2) {

@@ -26,7 +26,7 @@ export const TemplateManager = () => {
   const handleAdd = () => {
     const newTemplate: PacketTemplate = {
       id: crypto.randomUUID(),
-      name: 'New Template',
+      name: '新建模版',
       protocolId: rules[0]?.id || '',
       values: {}
     };
@@ -35,7 +35,7 @@ export const TemplateManager = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Delete this template?')) {
+    if (confirm('确认删除此模版?')) {
       saveTemplates(templates.filter(t => t.id !== id));
       if (selectedTemplateId === id) setSelectedTemplateId(null);
     }
@@ -45,7 +45,7 @@ export const TemplateManager = () => {
     if (!editingTemplate) return;
     const newTemplates = templates.map(t => t.id === editingTemplate.id ? editingTemplate : t);
     saveTemplates(newTemplates);
-    alert('Template saved');
+    alert('模版已保存');
   };
 
   const selectedRule = useMemo(() => 
@@ -63,7 +63,7 @@ export const TemplateManager = () => {
       {/* List */}
       <div className="w-64 border-r pr-4 flex flex-col gap-2">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">Templates</h3>
+          <h3 className="font-semibold">模版列表</h3>
           <button onClick={handleAdd} className="p-1 hover:bg-accent rounded">
             <Plus className="h-4 w-4" />
           </button>
@@ -100,13 +100,13 @@ export const TemplateManager = () => {
                         onChange={(e) => setEditingTemplate({...editingTemplate, name: e.target.value})}
                     />
                     <button onClick={handleSave} className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1 rounded text-sm">
-                        <Save className="h-3 w-3" /> Save
+                        <Save className="h-3 w-3" /> 保存
                     </button>
                 </div>
 
                 <div className="flex flex-col gap-4 overflow-auto flex-1 pr-2">
                     <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Protocol</label>
+                        <label className="text-xs text-muted-foreground block mb-1">协议</label>
                         <select
                             className="w-full border rounded p-1 text-sm bg-background"
                             value={editingTemplate.protocolId}
@@ -116,7 +116,7 @@ export const TemplateManager = () => {
                                 values: {} // Reset values on protocol change
                             })}
                         >
-                            <option value="">Select Protocol</option>
+                            <option value="">选择协议</option>
                             {rules.filter(r => r.type === 'custom').map(r => (
                                 <option key={r.id} value={r.id}>{r.name}</option>
                             ))}
@@ -125,13 +125,13 @@ export const TemplateManager = () => {
 
                     {selectedRule && (
                         <div className="space-y-3">
-                            <h4 className="font-medium text-sm border-b pb-1">Fields</h4>
+                            <h4 className="font-medium text-sm border-b pb-1">字段列表</h4>
                             {selectedRule.fields.map(field => (
                                 <div key={field.id} className="flex flex-col gap-1">
                                     <label className="text-xs font-medium">
                                         {field.name} 
                                         <span className="text-muted-foreground ml-1">
-                                            ({field.type}, {field.length} bytes)
+                                            ({field.type}, {field.length} 字节)
                                         </span>
                                     </label>
                                     <input
@@ -144,7 +144,7 @@ export const TemplateManager = () => {
                                                 [field.id]: e.target.value
                                             }
                                         })}
-                                        placeholder={`Enter ${field.type} value...`}
+                                        placeholder={`输入 ${field.type} 值...`}
                                     />
                                 </div>
                             ))}
@@ -153,15 +153,15 @@ export const TemplateManager = () => {
                 </div>
 
                 <div className="bg-muted p-3 rounded-md">
-                    <div className="text-xs font-medium text-muted-foreground mb-1">Generated Hex Preview</div>
+                    <div className="text-xs font-medium text-muted-foreground mb-1">生成 Hex 预览</div>
                     <div className="font-mono text-sm break-all bg-background p-2 rounded border">
-                        {generatedHex || 'No data'}
+                        {generatedHex || '无数据'}
                     </div>
                 </div>
             </>
         ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-                Select or create a template
+                请选择或创建模版
             </div>
         )}
       </div>

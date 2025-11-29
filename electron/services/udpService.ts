@@ -12,7 +12,7 @@ function cleanHex(input: string): string {
 function hexToBuffer(input: string): Buffer {
   const cleaned = cleanHex(input);
   if (cleaned.length % 2 !== 0) {
-    throw new Error('Invalid hex string length');
+    throw new Error('Hex 字符串长度无效');
   }
   return Buffer.from(cleaned, 'hex');
 }
@@ -78,7 +78,7 @@ export class UdpService extends EventEmitter {
 
   async send(ip: string, port: number, hexData: string): Promise<void> {
     if (!this.socket) {
-      throw new Error('Socket not started');
+      throw new Error('Socket 未启动 (请先启动监听)');
     }
 
     const buffer = hexToBuffer(hexData);

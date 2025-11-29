@@ -143,19 +143,19 @@ const UdpDebugger = () => {
           onClick={() => setActiveTab('debug')}
           className={`px-4 py-2 text-sm font-medium flex items-center gap-2 ${activeTab === 'debug' ? 'bg-background border-t border-x text-primary' : 'text-muted-foreground hover:bg-muted/60'}`}
         >
-          <Settings className="h-4 w-4" /> Debugger
+          <Settings className="h-4 w-4" /> 调试器
         </button>
         <button
           onClick={() => setActiveTab('templates')}
           className={`px-4 py-2 text-sm font-medium flex items-center gap-2 ${activeTab === 'templates' ? 'bg-background border-t border-x text-primary' : 'text-muted-foreground hover:bg-muted/60'}`}
         >
-          <FileCode className="h-4 w-4" /> Templates
+          <FileCode className="h-4 w-4" /> 模版管理
         </button>
         <button
           onClick={() => setActiveTab('reply')}
           className={`px-4 py-2 text-sm font-medium flex items-center gap-2 ${activeTab === 'reply' ? 'bg-background border-t border-x text-primary' : 'text-muted-foreground hover:bg-muted/60'}`}
         >
-          <Zap className="h-4 w-4" /> Auto Reply
+          <Zap className="h-4 w-4" /> 自动回复
         </button>
       </div>
 
@@ -176,9 +176,9 @@ const UdpDebugger = () => {
                     {/* Local */}
                     <div className="bg-card border rounded-lg p-4 space-y-4">
                         <div className="flex justify-between items-center">
-                            <h3 className="font-semibold text-sm text-muted-foreground">Local Listener</h3>
+                            <h3 className="font-semibold text-sm text-muted-foreground">本地监听</h3>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">Auto Reply</span>
+                                <span className="text-xs text-muted-foreground">自动回复</span>
                                 <button 
                                     onClick={() => setIsAutoReply(!isAutoReply)}
                                     className={`w-8 h-4 rounded-full transition-colors ${isAutoReply ? 'bg-green-500' : 'bg-gray-300'} relative`}
@@ -192,17 +192,17 @@ const UdpDebugger = () => {
                                 type="number"
                                 value={localPort}
                                 onChange={(e) => setLocalPort(e.target.value)}
-                                placeholder="Port"
+                                placeholder="端口"
                                 className="flex-1 px-3 py-2 bg-background border rounded-md text-sm"
                                 disabled={isListening}
                             />
                             {!isListening ? (
                                 <button onClick={handleStart} className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2 text-sm font-medium">
-                                    <Play className="h-4 w-4" /> Start
+                                    <Play className="h-4 w-4" /> 启动
                                 </button>
                             ) : (
                                 <button onClick={stop} className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 flex items-center gap-2 text-sm font-medium">
-                                    <Square className="h-4 w-4" /> Stop
+                                    <Square className="h-4 w-4" /> 停止
                                 </button>
                             )}
                         </div>
@@ -211,13 +211,13 @@ const UdpDebugger = () => {
                     {/* Remote */}
                     <div className="bg-card border rounded-lg p-4 space-y-4">
                         <div className="flex justify-between items-center">
-                             <h3 className="font-semibold text-sm text-muted-foreground">Send Message</h3>
+                             <h3 className="font-semibold text-sm text-muted-foreground">发送消息</h3>
                              <select 
                                 className="text-xs border rounded p-1 max-w-[120px]"
                                 value={selectedSendTemplateId}
                                 onChange={handleTemplateSelect}
                              >
-                                <option value="">Load Template...</option>
+                                <option value="">加载模版...</option>
                                 {templates.map(t => (
                                     <option key={t.id} value={t.id}>{t.name}</option>
                                 ))}
@@ -228,14 +228,14 @@ const UdpDebugger = () => {
                                 type="text"
                                 value={remoteIp}
                                 onChange={(e) => setRemoteIp(e.target.value)}
-                                placeholder="IP"
+                                placeholder="IP地址"
                                 className="px-3 py-2 bg-background border rounded-md text-sm"
                             />
                             <input
                                 type="number"
                                 value={remotePort}
                                 onChange={(e) => setRemotePort(e.target.value)}
-                                placeholder="Port"
+                                placeholder="端口"
                                 className="px-3 py-2 bg-background border rounded-md text-sm"
                             />
                         </div>
@@ -244,11 +244,11 @@ const UdpDebugger = () => {
                                 type="text"
                                 value={sendData}
                                 onChange={(e) => setSendData(e.target.value)}
-                                placeholder="Hex Data"
+                                placeholder="Hex 数据"
                                 className="flex-1 px-3 py-2 bg-background border rounded-md text-sm font-mono"
                             />
                             <button onClick={handleSend} className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 flex items-center gap-2 text-sm font-medium">
-                                <Send className="h-4 w-4" /> Send
+                                <Send className="h-4 w-4" /> 发送
                             </button>
                         </div>
                     </div>
@@ -257,8 +257,8 @@ const UdpDebugger = () => {
                 {/* Logs */}
                 <div className="flex-1 bg-card border rounded-lg flex flex-col min-h-0">
                     <div className="p-4 border-b flex justify-between items-center">
-                        <h3 className="font-semibold">Message Log</h3>
-                        <button onClick={clearMessages} className="text-muted-foreground hover:text-destructive" title="Clear">
+                        <h3 className="font-semibold">消息日志</h3>
+                        <button onClick={clearMessages} className="text-muted-foreground hover:text-destructive" title="清空">
                             <Trash2 className="h-4 w-4" />
                         </button>
                     </div>
@@ -266,10 +266,10 @@ const UdpDebugger = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-muted-foreground bg-muted/50 sticky top-0">
                                 <tr>
-                                    <th className="px-4 py-2">Time</th>
-                                    <th className="px-4 py-2">Dir</th>
-                                    <th className="px-4 py-2">Address</th>
-                                    <th className="px-4 py-2">Data (Hex)</th>
+                                    <th className="px-4 py-2">时间</th>
+                                    <th className="px-4 py-2">方向</th>
+                                    <th className="px-4 py-2">地址</th>
+                                    <th className="px-4 py-2">数据 (Hex)</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -278,7 +278,7 @@ const UdpDebugger = () => {
                                         <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleTimeString()}</td>
                                         <td className="px-4 py-2">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${msg.direction === 'in' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                                                {msg.direction === 'in' ? 'IN' : 'OUT'}
+                                                {msg.direction === 'in' ? '接收' : '发送'}
                                             </span>
                                         </td>
                                         <td className="px-4 py-2 font-mono text-xs">{msg.remoteAddress}:{msg.remotePort}</td>
@@ -286,7 +286,7 @@ const UdpDebugger = () => {
                                     </tr>
                                 ))}
                                 {messages.length === 0 && (
-                                    <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No messages</td></tr>
+                                    <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">暂无消息</td></tr>
                                 )}
                             </tbody>
                         </table>

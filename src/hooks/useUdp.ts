@@ -22,7 +22,7 @@ export const useUdp = () => {
   const start = useCallback(async (port: number) => {
     const ipcRenderer = getIpcRenderer();
     if (!ipcRenderer) {
-      setError('Electron environment not found');
+      setError('未找到 Electron 环境');
       return;
     }
     
@@ -59,7 +59,7 @@ export const useUdp = () => {
   const send = useCallback(async (ip: string, port: number, data: string) => {
     const ipcRenderer = getIpcRenderer();
     if (!ipcRenderer) {
-      setError('Electron environment not found');
+      setError('未找到 Electron 环境');
       return;
     }
 
