@@ -265,7 +265,7 @@ const ParserView = () => {
       <div className="flex-1 flex gap-4 min-h-0">
         {/* Input Area */}
         <div className="w-1/2 flex flex-col gap-2">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center h-8">
             <h3 className="font-semibold text-sm">输入</h3>
             <div className="flex gap-2">
               <button onClick={handleCopy} className="p-1 hover:bg-accent rounded" title="复制到剪贴板">
@@ -308,7 +308,7 @@ const ParserView = () => {
 
         {/* Result Area */}
         <div className="w-1/2 flex flex-col gap-2">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center h-8">
             <h3 className="font-semibold text-sm">解析结果</h3>
           </div>
           <div className="flex-1 min-h-0 overflow-auto">

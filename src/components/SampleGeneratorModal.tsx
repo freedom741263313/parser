@@ -41,7 +41,7 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
             return (
                 <select
                     className="w-full bg-background border rounded px-2 py-1 text-sm"
-                    value={values[field.id]}
+                    value={values[field.id] ?? ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                 >
                     {enumDef.items.map((item, idx) => (
@@ -60,8 +60,9 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
             <input
                 type="number"
                 className="w-full bg-background border rounded px-2 py-1 text-sm"
-                value={values[field.id]}
+                value={values[field.id] ?? 0}
                 onChange={(e) => handleChange(field.id, Number(e.target.value))}
+                onFocus={(e) => e.target.select()}
             />
         );
     }
@@ -73,7 +74,7 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
                 type="text"
                 placeholder="输入大整数"
                 className="w-full bg-background border rounded px-2 py-1 text-sm"
-                value={values[field.id]}
+                value={values[field.id] ?? ''}
                 onChange={(e) => handleChange(field.id, e.target.value)}
             />
         );
@@ -86,7 +87,7 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
                 type="text"
                 maxLength={field.length}
                 className="w-full bg-background border rounded px-2 py-1 text-sm"
-                value={values[field.id]}
+                value={values[field.id] ?? ''}
                 onChange={(e) => handleChange(field.id, e.target.value)}
                 placeholder="请输入文本"
             />
@@ -100,7 +101,7 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
                 type="text"
                 placeholder="值1;值2;值3 (使用分号分隔)"
                 className="w-full bg-background border rounded px-2 py-1 text-sm"
-                value={values[field.id]}
+                value={values[field.id] ?? ''}
                 onChange={(e) => handleChange(field.id, e.target.value)}
             />
         );
@@ -112,7 +113,7 @@ export const SampleGeneratorModal: React.FC<Props> = ({ rule, enums, onClose, on
             type="text"
             placeholder="请输入十六进制或数值"
             className="w-full bg-background border rounded px-2 py-1 text-sm"
-            value={values[field.id]}
+            value={values[field.id] ?? ''}
             onChange={(e) => handleChange(field.id, e.target.value)}
         />
     );

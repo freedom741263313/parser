@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { UdpService } from './udpService';
+import { UdpService } from '../../../../electron/services/udpService';
 import dgram from 'dgram';
 import { EventEmitter } from 'events';
 

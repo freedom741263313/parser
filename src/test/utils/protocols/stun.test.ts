@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseStun } from './stun';
-import { hexToBuffer } from '../hex';
+import { parseStun } from '../../../utils/protocols/stun';
+import { hexToBuffer } from '../../../utils/hex';
 
 describe('STUN Parser', () => {
   it('should parse standard Binding Request', () => {

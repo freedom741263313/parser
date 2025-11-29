@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ParserEngine } from './parser';
-import { ProtocolRule } from '../types/rule';
+import { ParserEngine } from '../../utils/parser';
+import { ProtocolRule } from '../../types/rule';
 
 describe('ParserEngine', () => {
   const engine = new ParserEngine();

@@ -6,7 +6,8 @@
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "wait-on tcp:5173 && tsc -p electron/tsconfig.json && electron .",
-    "build": "tsc && vite build && tsc -p electron/tsconfig.json && electron-builder"
+    "build": "tsc && vite build && tsc -p electron/tsconfig.json && electron-builder",
+    "test": "vitest"
   },
   "dependencies": {
     "react": "^18.2.0",

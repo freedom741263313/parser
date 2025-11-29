@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cleanHex, formatHex, hexToBuffer, bufferToHex } from './hex';
+import { cleanHex, formatHex, hexToBuffer, bufferToHex } from '../../utils/hex';
 
 describe('Hex Utils', () => {
   it('cleanHex should remove non-hex characters', () => {
