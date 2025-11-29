@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import { UdpService } from './services/udpService';
@@ -172,6 +172,7 @@ ipcMain.handle(IPC_STORE.IMPORT_DATA, async () => {
 });
 
 app.whenReady().then(async () => {
+  Menu.setApplicationMenu(null);
   await storeService.init();
   createWindow();
 

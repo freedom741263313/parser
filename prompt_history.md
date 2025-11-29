@@ -113,3 +113,11 @@
 28. **User**: 重新阅读workflow不要忘记
     - **Action**: Reviewed workflow, updated prompt history, and verified PRD/Prototype coverage.
     - **Details**: Saved this prompt history. Checked PRD v1.4 status.
+
+29. **User**: 怎么做才能让你永远不忘记workflow和rule呢
+    - **Action**: Created `.cursorrules` file.
+    - **Details**: Created `.cursorrules` file with project rules and workflow to serve as a permanent reference for the AI.
+
+30. **User**: 要求系统将红框中的内容隐藏
+    - **Action**: Hidden application menu bar.
+    - **Details**: Updated `electron/main.ts` to set `Menu.setApplicationMenu(null)`. Created `PRD_v1.5.md` and `PROTOTYPE_v1.5.md` to document the UI change.
