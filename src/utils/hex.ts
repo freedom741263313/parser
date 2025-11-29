@@ -25,3 +25,16 @@ export function bufferToHex(buffer: Uint8Array): string {
     .map(b => b.toString(16).padStart(2, '0'))
     .join(' ');
 }
+
+export function formatHexBlock(input: string, bytesPerLine: number = 16): string {
+  const cleaned = cleanHex(input);
+  const bytes = cleaned.match(/.{1,2}/g) || [];
+  const lines: string[] = [];
+  
+  for (let i = 0; i < bytes.length; i += bytesPerLine) {
+    const lineBytes = bytes.slice(i, i + bytesPerLine);
+    lines.push(lineBytes.join(' '));
+  }
+  
+  return lines.join('\n');
+}

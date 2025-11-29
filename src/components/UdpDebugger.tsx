@@ -4,6 +4,7 @@ import { useUdp } from '../hooks/useUdp';
 import { useStore } from '../hooks/useStore';
 import { TemplateManager } from './TemplateManager';
 import { AutoReplyManager } from './AutoReplyManager';
+import { LogMessageRow } from './LogMessageRow';
 import { ParserEngine } from '../utils/parser';
 import { PacketGenerator } from '../utils/generator';
 import { hexToBuffer, cleanHex } from '../utils/hex';
@@ -15,6 +16,8 @@ const UdpDebugger = () => {
   const { rules, enums, templates, replyRules } = useStore();
   const { messages, isListening, error, start, stop, send, clearMessages } = useUdp();
   
+  const engine = useMemo(() => new ParserEngine(enums), [enums]);
+
   const [activeTab, setActiveTab] = useState<'debug' | 'templates' | 'reply'>('debug');
   const [localPort, setLocalPort] = useState('3000');
   const [remoteIp, setRemoteIp] = useState('127.0.0.1');
@@ -40,7 +43,6 @@ const UdpDebugger = () => {
   const processAutoReply = (msg: UdpMessage) => {
     try {
         const buffer = hexToBuffer(msg.data);
-        const engine = new ParserEngine(enums);
 
         for (const rule of replyRules) {
             if (!rule.isActive) continue;
@@ -308,29 +310,21 @@ const UdpDebugger = () => {
                     </div>
                     <div className="flex-1 overflow-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-muted-foreground bg-muted/50 sticky top-0">
+                            <thead className="text-xs text-muted-foreground bg-muted/50 sticky top-0 z-10">
                                 <tr>
                                     <th className="px-4 py-2">时间</th>
                                     <th className="px-4 py-2">方向</th>
                                     <th className="px-4 py-2">地址</th>
                                     <th className="px-4 py-2">数据 (Hex)</th>
+                                    <th className="px-2 py-2 w-8"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
                                 {messages.map((msg) => (
-                                    <tr key={msg.id} className="hover:bg-muted/50">
-                                        <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleTimeString()}</td>
-                                        <td className="px-4 py-2">
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${msg.direction === 'in' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                                                {msg.direction === 'in' ? '接收' : '发送'}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-2 font-mono text-xs">{msg.remoteAddress}:{msg.remotePort}</td>
-                                        <td className="px-4 py-2 font-mono break-all">{msg.data}</td>
-                                    </tr>
+                                    <LogMessageRow key={msg.id} msg={msg} rules={rules} engine={engine} />
                                 ))}
                                 {messages.length === 0 && (
-                                    <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">暂无消息</td></tr>
+                                    <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">暂无消息</td></tr>
                                 )}
                             </tbody>
                         </table>
