@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, Settings, GripVertical, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, Save, Settings, GripVertical, Download, Upload, Copy } from 'lucide-react';
 import { ProtocolRule, FieldDefinition, FieldType, Endianness, ParserAlgorithm } from '../types/rule';
 import { useStore } from '../hooks/useStore';
 
@@ -29,6 +29,23 @@ const RuleManager = () => {
       type: 'custom',
       fields: []
     };
+    saveRules([...rules, newRule]);
+    setSelectedRuleId(newRule.id);
+  };
+
+  const handleCopyRule = (rule: ProtocolRule) => {
+    const newRule: ProtocolRule = {
+      ...JSON.parse(JSON.stringify(rule)),
+      id: crypto.randomUUID(),
+      name: `${rule.name} (Copy)`
+    };
+    
+    // Also generate new IDs for fields to avoid conflicts
+    newRule.fields = newRule.fields.map(f => ({
+        ...f,
+        id: crypto.randomUUID()
+    }));
+
     saveRules([...rules, newRule]);
     setSelectedRuleId(newRule.id);
   };
@@ -135,14 +152,24 @@ const RuleManager = () => {
               }`}
             >
               <span className="truncate">{r.name}</span>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleDeleteRule(r.id); }}
-                className={`opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded ${
-                    selectedRuleId === r.id ? 'hover:bg-primary-foreground/20' : ''
-                }`}
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+              <div className="flex gap-1">
+                <button
+                    onClick={(e) => { e.stopPropagation(); handleCopyRule(r); }}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-primary/20 rounded"
+                    title="Copy Rule"
+                >
+                    <Copy className="h-3 w-3" />
+                </button>
+                <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteRule(r.id); }}
+                    className={`opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded ${
+                        selectedRuleId === r.id ? 'hover:bg-primary-foreground/20' : ''
+                    }`}
+                    title="Delete Rule"
+                >
+                    <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           ))}
           {rules.length === 0 && (

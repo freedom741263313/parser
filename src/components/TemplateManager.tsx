@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Trash2, Save, FileCode } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
-import { PacketTemplate, ProtocolRule } from '../types/rule';
+import { PacketTemplate, ProtocolRule, FieldDefinition } from '../types/rule';
 import { PacketGenerator } from '../utils/generator';
 
 const generator = new PacketGenerator();
 
 export const TemplateManager = () => {
-  const { rules, templates, saveTemplates } = useStore();
+  const { rules, templates, saveTemplates, enums } = useStore();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<PacketTemplate | null>(null);
 
@@ -57,6 +57,50 @@ export const TemplateManager = () => {
     if (!selectedRule || !editingTemplate) return '';
     return generator.generate(selectedRule, editingTemplate.values);
   }, [selectedRule, editingTemplate?.values]);
+
+  const renderFieldInput = (field: FieldDefinition) => {
+    if (!editingTemplate) return null;
+
+    const enumDef = field.enumId ? enums.find(e => e.id === field.enumId) : undefined;
+
+    if (enumDef) {
+        return (
+            <select
+                className="w-full border rounded px-2 py-1 text-sm bg-background"
+                value={editingTemplate.values[field.id] || ''}
+                onChange={(e) => setEditingTemplate({
+                    ...editingTemplate,
+                    values: {
+                        ...editingTemplate.values,
+                        [field.id]: e.target.value
+                    }
+                })}
+            >
+                <option value="">选择 {enumDef.name}</option>
+                {enumDef.items.map(item => (
+                    <option key={item.value} value={item.value}>
+                        {item.label} ({item.value})
+                    </option>
+                ))}
+            </select>
+        );
+    }
+
+    return (
+        <input
+            className="border rounded px-2 py-1 text-sm bg-background"
+            value={editingTemplate.values[field.id] || ''}
+            onChange={(e) => setEditingTemplate({
+                ...editingTemplate,
+                values: {
+                    ...editingTemplate.values,
+                    [field.id]: e.target.value
+                }
+            })}
+            placeholder={field.type === 'array' ? '输入数组元素 (用 ; 分隔)' : `输入 ${field.type} 值...`}
+        />
+    );
+  };
 
   return (
     <div className="flex h-full gap-4">
@@ -126,28 +170,19 @@ export const TemplateManager = () => {
                     {selectedRule && (
                         <div className="space-y-3">
                             <h4 className="font-medium text-sm border-b pb-1">字段列表</h4>
-                            {selectedRule.fields.map(field => (
-                                <div key={field.id} className="flex flex-col gap-1">
-                                    <label className="text-xs font-medium">
-                                        {field.name} 
-                                        <span className="text-muted-foreground ml-1">
-                                            ({field.type}, {field.length} 字节)
-                                        </span>
-                                    </label>
-                                    <input
-                                        className="border rounded px-2 py-1 text-sm bg-background"
-                                        value={editingTemplate.values[field.id] || ''}
-                                        onChange={(e) => setEditingTemplate({
-                                            ...editingTemplate,
-                                            values: {
-                                                ...editingTemplate.values,
-                                                [field.id]: e.target.value
-                                            }
-                                        })}
-                                        placeholder={`输入 ${field.type} 值...`}
-                                    />
-                                </div>
-                            ))}
+                            <div className="grid grid-cols-2 gap-4">
+                                {selectedRule.fields.map(field => (
+                                    <div key={field.id} className="flex flex-col gap-1">
+                                        <label className="text-xs font-medium">
+                                            {field.name} 
+                                            <span className="text-muted-foreground ml-1">
+                                                ({field.type}, {field.length} 字节)
+                                            </span>
+                                        </label>
+                                        {renderFieldInput(field)}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
