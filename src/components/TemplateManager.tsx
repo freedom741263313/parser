@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, Save, FileCode, Upload, Download } from 'lucide-react';
+import { Plus, Trash2, Save, FileCode, Upload, Download, Target } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
-import { PacketTemplate, ProtocolRule, FieldDefinition } from '../types/rule';
+import { PacketTemplate, ProtocolRule, FieldDefinition, MatchRange } from '../types/rule';
 import { PacketGenerator } from '../utils/generator';
 
 const generator = new PacketGenerator();
@@ -67,6 +67,41 @@ export const TemplateManager = () => {
     if (!selectedRule || !editingTemplate) return '';
     return generator.generate(selectedRule, editingTemplate.values);
   }, [selectedRule, editingTemplate?.values]);
+
+  // Match Rules Management
+  const handleAddMatchRule = () => {
+    if (!editingTemplate) return;
+    const currentRules = editingTemplate.matchRanges || [];
+    // Default to field type if there are fields
+    const newRule: MatchRange = selectedRule?.fields[0] 
+        ? { type: 'field', fieldId: selectedRule.fields[0].id }
+        : { type: 'custom', offset: 0, length: 1, value: '00' };
+    
+    setEditingTemplate({
+        ...editingTemplate,
+        matchRanges: [...currentRules, newRule]
+    });
+  };
+
+  const handleUpdateMatchRule = (index: number, updates: Partial<MatchRange>) => {
+    if (!editingTemplate) return;
+    const currentRules = [...(editingTemplate.matchRanges || [])];
+    currentRules[index] = { ...currentRules[index], ...updates };
+    setEditingTemplate({
+        ...editingTemplate,
+        matchRanges: currentRules
+    });
+  };
+
+  const handleRemoveMatchRule = (index: number) => {
+    if (!editingTemplate) return;
+    const currentRules = [...(editingTemplate.matchRanges || [])];
+    currentRules.splice(index, 1);
+    setEditingTemplate({
+        ...editingTemplate,
+        matchRanges: currentRules
+    });
+  };
 
   const renderFieldInput = (field: FieldDefinition) => {
     if (!editingTemplate) return null;
@@ -197,6 +232,96 @@ export const TemplateManager = () => {
                             ))}
                         </select>
                     </div>
+
+                    {/* Match Rules Section */}
+                    {selectedRule && (
+                        <div className="bg-muted/30 p-3 rounded-md border">
+                            <div className="flex justify-between items-center mb-2">
+                                <h4 className="text-sm font-medium flex items-center gap-2">
+                                    <Target className="h-4 w-4 text-primary" />
+                                    匹配规则 (特征识别)
+                                </h4>
+                                <button 
+                                    onClick={handleAddMatchRule}
+                                    className="text-xs flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded hover:bg-primary/20"
+                                >
+                                    <Plus className="h-3 w-3" /> 添加规则
+                                </button>
+                            </div>
+                            <div className="text-xs text-muted-foreground mb-2">
+                                配置用于快速识别此模版的特征规则。如果配置了规则，仅当所有规则匹配时才认为识别成功。未配置则使用全量 Hex 匹配。
+                            </div>
+                            
+                            <div className="space-y-2">
+                                {(!editingTemplate.matchRanges || editingTemplate.matchRanges.length === 0) && (
+                                    <div className="text-xs italic text-muted-foreground p-2 bg-background rounded border text-center">
+                                        使用默认全量匹配模式
+                                    </div>
+                                )}
+                                {editingTemplate.matchRanges?.map((rule, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 bg-background p-2 rounded border text-sm">
+                                        <select
+                                            className="border rounded px-1 py-0.5 text-xs"
+                                            value={rule.type}
+                                            onChange={(e) => handleUpdateMatchRule(idx, { type: e.target.value as any })}
+                                        >
+                                            <option value="field">字段匹配</option>
+                                            <option value="custom">自定义偏移</option>
+                                        </select>
+
+                                        {rule.type === 'field' ? (
+                                            <select
+                                                className="flex-1 border rounded px-1 py-0.5 text-xs"
+                                                value={rule.fieldId || ''}
+                                                onChange={(e) => handleUpdateMatchRule(idx, { fieldId: e.target.value })}
+                                            >
+                                                {selectedRule.fields.map(f => (
+                                                    <option key={f.id} value={f.id}>{f.name}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-xs text-muted-foreground">Offset:</span>
+                                                    <input
+                                                        type="number"
+                                                        className="w-12 border rounded px-1 py-0.5 text-xs"
+                                                        value={rule.offset || 0}
+                                                        onChange={(e) => handleUpdateMatchRule(idx, { offset: parseInt(e.target.value) })}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-xs text-muted-foreground">Len:</span>
+                                                    <input
+                                                        type="number"
+                                                        className="w-12 border rounded px-1 py-0.5 text-xs"
+                                                        value={rule.length || 1}
+                                                        onChange={(e) => handleUpdateMatchRule(idx, { length: parseInt(e.target.value) })}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-xs text-muted-foreground">Val(Hex):</span>
+                                                    <input
+                                                        className="w-20 border rounded px-1 py-0.5 text-xs font-mono"
+                                                        value={rule.value || ''}
+                                                        placeholder="00 AA"
+                                                        onChange={(e) => handleUpdateMatchRule(idx, { value: e.target.value })}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        <button 
+                                            onClick={() => handleRemoveMatchRule(idx)}
+                                            className="text-muted-foreground hover:text-destructive p-1"
+                                        >
+                                            <Trash2 className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {selectedRule && (
                         <div className="space-y-3">

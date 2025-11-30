@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Copy, ChevronRight, ChevronDown, Check } from 'lucide-react';
 import { UdpMessage } from '../types/udp';
-import { ProtocolRule, ParsedField, PacketTemplate } from '../types/rule';
+import { ProtocolRule, ParsedField, PacketTemplate, MatchRange } from '../types/rule';
 import { ParserEngine } from '../utils/parser';
 import { PacketGenerator } from '../utils/generator';
 import { formatHexBlock, hexToBuffer, cleanHex } from '../utils/hex';
@@ -37,19 +37,102 @@ export const LogMessageRow: React.FC<LogMessageRowProps> = ({ msg, rules, templa
       if (!rule) continue;
 
       try {
-        // Generate hex from template values
-        const templateHex = generator.generate(rule, template.values);
-        
-        // console.log('Comparing:', { t: cleanHex(templateHex), m: msgHex });
+        let isMatch = false;
 
-        // Compare generated hex with message hex
-        if (cleanHex(templateHex).toLowerCase() === msgHex.toLowerCase()) {
+        // 1. Check for configured Match Rules (Feature Matching)
+        if (template.matchRanges && template.matchRanges.length > 0) {
+            let allRangesMatch = true;
+            // Generate full hex for the template (can be optimized to generate only needed parts later)
+            const templateHex = cleanHex(generator.generate(rule, template.values));
+            
+            for (const range of template.matchRanges) {
+                let targetOffset = range.offset || 0;
+                let targetLength = range.length || 1;
+                let targetValue = range.value;
+
+                // If field-based match, derive offset/length/value from rule and template
+                if (range.type === 'field' && range.fieldId) {
+                    const field = rule.fields.find(f => f.id === range.fieldId);
+                    if (field) {
+                        // Calculate offset if not stored (needs to traverse previous fields)
+                        // Ideally field definition has offset, but it might be auto-calculated
+                        // Simple assumption: re-calculate offset by summing lengths of previous fields
+                        // NOTE: This is a simplification. Complex rules might have dynamic offsets.
+                        // For now, we rely on the fact that generator.generate produces the full hex in order.
+                        
+                        // We need to find where this field is in the generated hex
+                        // This is tricky without running a full parse trace or generation trace.
+                        // BUT, since we have the FULL templateHex and the FULL rule, 
+                        // we can actually re-use the Parser to find the offset of the field!
+                        // OR simpler: if we generated the hex, we assume the structure matches.
+                        
+                        // Let's try to find the field's position.
+                        let currentOffset = 0;
+                        for (const f of rule.fields) {
+                            if (f.id === range.fieldId) {
+                                targetOffset = currentOffset;
+                                targetLength = f.length;
+                                break;
+                            }
+                            currentOffset += f.length;
+                        }
+                        
+                        // The value in the templateHex at this position is what we expect
+                        // (We don't need to re-format the value from template.values, just extract from hex)
+                        if (templateHex.length >= (targetOffset + targetLength) * 2) {
+                             targetValue = templateHex.substring(targetOffset * 2, (targetOffset + targetLength) * 2);
+                        }
+                    }
+                } else {
+                    // Custom range: targetValue must be provided or extracted from templateHex
+                    if (!targetValue && templateHex.length >= (targetOffset + targetLength) * 2) {
+                        targetValue = templateHex.substring(targetOffset * 2, (targetOffset + targetLength) * 2);
+                    }
+                }
+
+                // Perform the check
+                if (!targetValue) {
+                    allRangesMatch = false;
+                    break;
+                }
+
+                // Extract corresponding part from message
+                if (msgHex.length < (targetOffset + targetLength) * 2) {
+                    allRangesMatch = false;
+                    break;
+                }
+                
+                const msgPart = msgHex.substring(targetOffset * 2, (targetOffset + targetLength) * 2);
+                
+                if (msgPart.toLowerCase() !== targetValue.toLowerCase()) {
+                    allRangesMatch = false;
+                    break;
+                }
+            }
+            
+            if (allRangesMatch) {
+                isMatch = true;
+            }
+
+        } else {
+            // 2. Fallback: Full Hex Match (Legacy behavior)
+            // Generate hex from template values
+            const templateHex = generator.generate(rule, template.values);
+            
+            // Compare generated hex with message hex
+            if (cleanHex(templateHex).toLowerCase() === msgHex.toLowerCase()) {
+                isMatch = true;
+            }
+        }
+
+        if (isMatch) {
           // If match, parse the message to get field details
           const buffer = hexToBuffer(msg.data);
           const fields = engine.parse(buffer, rule);
           
           return { ruleName: template.name, fields };
         }
+
       } catch (e) {
          // Ignore errors during generation (e.g. incomplete template)
          // console.error('Generator error:', e);

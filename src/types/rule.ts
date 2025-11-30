@@ -49,11 +49,20 @@ export interface ProtocolRule {
   sampleHex?: string; // User saved sample
 }
 
+export interface MatchRange {
+  type: 'field' | 'custom';
+  fieldId?: string; // if type is field
+  offset?: number;  // if type is custom or cached for field
+  length?: number;  // if type is custom or cached for field
+  value?: string;   // Expected hex string (if custom, or override). If field, derived from template values.
+}
+
 export interface PacketTemplate {
   id: string;
   name: string;
   protocolId: string;
   values: Record<string, any>; // fieldId -> value
+  matchRanges?: MatchRange[]; // List of ranges to match. If empty, use full match.
 }
 
 export interface ReplyAction {
