@@ -104,7 +104,7 @@ export const AutoReplyManager = () => {
               }`}
             >
               <div className="flex items-center gap-2 overflow-hidden">
-                <div className={`w-2 h-2 rounded-full ${r.isActive ? 'bg-green-500' : 'bg-muted'}`} />
+                <div className={`w-2 h-2 rounded-full ${r.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
                 <span className="truncate text-sm">{r.name}</span>
               </div>
               <button
