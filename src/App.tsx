@@ -2,15 +2,18 @@ import React from 'react';
 import { HashRouter as Router } from 'react-router-dom';
 import { MainLayout } from './components/MainLayout';
 import { StoreProvider } from './context/StoreContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Main App Component
 function App() {
   return (
-    <StoreProvider>
-      <Router>
-        <MainLayout />
-      </Router>
-    </StoreProvider>
+    <ThemeProvider>
+      <StoreProvider>
+        <Router>
+          <MainLayout />
+        </Router>
+      </StoreProvider>
+    </ThemeProvider>
   );
 }
 

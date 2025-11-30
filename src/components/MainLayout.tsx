@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FileJson, Activity, Settings, Database, Layout, ChevronLeft, ChevronRight, Network } from 'lucide-react';
+import { FileJson, Activity, Settings, Database, Layout, ChevronLeft, ChevronRight, Network, Palette } from 'lucide-react';
 import clsx from 'clsx';
 
 import ParserView from './ParserView';
 import UdpDebugger from './UdpDebugger';
 import RuleManager from './RuleManager';
 import EnumManager from './EnumManager';
+import { useTheme } from '../context/ThemeContext';
 
 const NavItem = ({ to, icon: Icon, label, isCollapsed }: { to: string; icon: any; label: string; isCollapsed: boolean }) => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const NavItem = ({ to, icon: Icon, label, isCollapsed }: { to: string; icon: any
 export function MainLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const { theme, setTheme, availableThemes } = useTheme();
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -63,6 +65,25 @@ export function MainLayout() {
         </nav>
         
         <div className="p-4 border-t flex flex-col gap-4">
+             {/* Theme Switcher */}
+             <div className={clsx("flex flex-col gap-2", isCollapsed ? "items-center" : "")}>
+                {!isCollapsed && <span className="text-xs font-medium text-muted-foreground px-1">主题切换</span>}
+                <div className={clsx("flex gap-2 flex-wrap", isCollapsed ? "justify-center" : "")}>
+                    {availableThemes.map(t => (
+                        <button
+                            key={t.id}
+                            onClick={() => setTheme(t.id)}
+                            title={t.name}
+                            className={clsx(
+                                "w-6 h-6 rounded-full border-2 transition-all",
+                                theme === t.id ? "border-foreground scale-110" : "border-transparent hover:scale-110"
+                            )}
+                            style={{ backgroundColor: t.color }}
+                        />
+                    ))}
+                </div>
+            </div>
+
             <div className={clsx("flex", isCollapsed ? "justify-center" : "justify-end")}>
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
