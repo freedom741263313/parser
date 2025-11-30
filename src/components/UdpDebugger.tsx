@@ -227,7 +227,7 @@ const UdpDebugger = () => {
                                 <span className="text-xs text-muted-foreground">自动回复</span>
                                 <button 
                                     onClick={() => setIsAutoReply(!isAutoReply)}
-                                    className={`w-8 h-4 rounded-full transition-colors ${isAutoReply ? 'bg-green-500' : 'bg-gray-300'} relative`}
+                                    className={`w-8 h-4 rounded-full transition-colors ${isAutoReply ? 'bg-green-500' : 'bg-muted'} relative`}
                                 >
                                     <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isAutoReply ? 'left-4.5' : 'left-0.5'}`} style={{ left: isAutoReply ? '18px' : '2px' }} />
                                 </button>

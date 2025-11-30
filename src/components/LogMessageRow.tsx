@@ -153,7 +153,7 @@ export const LogMessageRow: React.FC<LogMessageRowProps> = ({ msg, rules, templa
           {new Date(msg.timestamp).toLocaleTimeString()}
         </td>
         <td className="px-4 py-2 whitespace-nowrap">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${msg.direction === 'in' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${msg.direction === 'in' ? 'bg-primary/15 text-primary' : 'bg-green-500/15 text-green-600 dark:text-green-400'}`}>
             {msg.direction === 'in' ? '接收' : '发送'}
           </span>
         </td>
