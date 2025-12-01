@@ -1,6 +1,8 @@
 {
   "name": "parser",
   "version": "1.0.0",
+  "description": "A UDP Parser application",
+  "author": "User",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
@@ -50,10 +52,9 @@
     },
     "win": {
       "target": [
-        "nsis",
         "portable"
       ],
-      "icon": "public/vite.svg"
+      "icon": "public/icon.png"
     },
     "linux": {
       "target": [
