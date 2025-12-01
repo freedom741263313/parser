@@ -33,6 +33,17 @@ describe('ParserView', () => {
     vi.spyOn(useStoreHook, 'useStore').mockReturnValue({
       rules: mockRules,
       enums: [],
+      templates: [
+        {
+            id: 't1',
+            name: 'Template 1',
+            protocolId: 'rule1',
+            values: { f1: 0x1234 },
+            matchRanges: [
+                { offset: 0, length: 1, value: '12' }
+            ]
+        }
+      ],
       saveRules: mockSaveRules,
       loading: false,
       addRule: vi.fn(),
@@ -120,5 +131,58 @@ describe('ParserView', () => {
 
     // Save button should not be present for STUN
     expect(screen.queryByTitle('保存为示例')).not.toBeInTheDocument();
+  });
+
+  it('should allow auto-detect protocol', async () => {
+    render(<ParserView />);
+    const select = screen.getByRole('combobox');
+    // Select "Auto Detect" (empty value)
+    fireEvent.change(select, { target: { value: '' } });
+
+    const input = screen.getByPlaceholderText(/在此粘贴16进制数据/);
+    // Matches 'rule1' template (starts with 12)
+    fireEvent.change(input, { target: { value: '12 34' } });
+    
+    const parseBtn = screen.getByText('解析');
+    fireEvent.click(parseBtn);
+
+    // Should parse successfully using rule1
+    // Since ParsedResultTable is mocked, we can't check its content easily, 
+    // but we can check that no error is displayed.
+    // Or better, we can check if the rule name is displayed if we didn't mock everything away.
+    // The real ParserView sets parsedResults state.
+    
+    // We can check if error message is absent
+    expect(screen.queryByText(/错误:/)).not.toBeInTheDocument();
+  });
+
+  it('should show error when auto-detect fails', async () => {
+    render(<ParserView />);
+    const select = screen.getByRole('combobox');
+    fireEvent.change(select, { target: { value: '' } });
+
+    const input = screen.getByPlaceholderText(/在此粘贴16进制数据/);
+    // Does not match 'rule1' (starts with 12)
+    fireEvent.change(input, { target: { value: 'FF FF' } });
+    
+    const parseBtn = screen.getByText('解析');
+    fireEvent.click(parseBtn);
+
+    expect(screen.getByText(/错误: 未能自动匹配到合适的协议模版/)).toBeInTheDocument();
+  });
+
+  it('should display matched template name when auto-detect succeeds', async () => {
+    render(<ParserView />);
+    const select = screen.getByRole('combobox');
+    fireEvent.change(select, { target: { value: '' } });
+
+    const input = screen.getByPlaceholderText(/在此粘贴16进制数据/);
+    fireEvent.change(input, { target: { value: '12 34' } }); // Matches Template 1
+    
+    const parseBtn = screen.getByText('解析');
+    fireEvent.click(parseBtn);
+
+    expect(screen.getByText('已匹配模版:')).toBeInTheDocument();
+    expect(screen.getByText('Template 1')).toBeInTheDocument();
   });
 });

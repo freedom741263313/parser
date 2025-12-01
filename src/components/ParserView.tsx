@@ -6,6 +6,7 @@ import { ParserEngine } from '../utils/parser';
 import { useStore } from '../hooks/useStore';
 import { ParsedResultTable } from './ParsedResultTable';
 import { Play, Trash2, Copy, Save } from 'lucide-react';
+import { findMatchingTemplate } from '../utils/matcher';
 
 import { PacketBuilder } from '../utils/builder';
 import { SampleGeneratorModal } from './SampleGeneratorModal';
@@ -13,10 +14,11 @@ import { SampleGeneratorModal } from './SampleGeneratorModal';
 const SAMPLE_STUN_HEX = "00 01 00 58 21 12 A4 42 B7 E7 A7 01 BC 34 D6 86 FA 87 DF AE 80 22 00 0B 53 54 55 4E 20 74 65 73 74 20 63 6C 69 65 6E 74 00 00 00 20 00 08 00 01 2E 4F 13 35 00 06 00 09 65 76 6F 6C 75 74 69 6F 6E 20 00 00 00 08 00 14 29 05 65 B1 91 79 D0 42 6F 92 80 28 00 04 6D 33 7D 0D";
 
 const ParserView = () => {
-  const { rules, enums, saveRules, loading } = useStore();
+  const { rules, enums, templates, saveRules, loading } = useStore();
   const [inputHex, setInputHex] = useState('');
-  const [selectedProtocolId, setSelectedProtocolId] = useState<string>('custom_demo');
+  const [selectedProtocolId, setSelectedProtocolId] = useState<string>(''); // Default to Auto
   const [parsedResults, setParsedResults] = useState<ParsedField[]>([]);
+  const [matchedTemplateName, setMatchedTemplateName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showSampleInput, setShowSampleInput] = useState(false);
   const [sampleInputVal, setSampleInputVal] = useState('');
@@ -26,13 +28,10 @@ const ParserView = () => {
   const [showLoadOption, setShowLoadOption] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
-  // Auto-select first user rule when loaded
-  React.useEffect(() => {
-    if (!loading && rules.length > 0 && selectedProtocolId === 'custom_demo') {
-      setSelectedProtocolId(rules[0].id);
-    }
-  }, [loading, rules]);
-
+  // Auto-select logic removed/modified: default is now '' (Auto)
+  // But we can keep the effect to ensure we don't select an invalid ID if rules change, 
+  // though 'auto' is always valid.
+  
   // Mock Custom Rule for demo
   const mockRule: ProtocolRule = useMemo(() => ({
     id: 'custom_demo',
@@ -57,7 +56,7 @@ const ParserView = () => {
   }, [rules, mockRule]);
 
   const currentRule = useMemo(() => 
-      availableRules.find(r => r.id === selectedProtocolId) || mockRule
+      availableRules.find(r => r.id === selectedProtocolId) || null
   , [availableRules, selectedProtocolId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -72,16 +71,35 @@ const ParserView = () => {
 
   const handleParse = () => {
     setError(null);
+    setMatchedTemplateName(null);
     try {
       const buffer = hexToBuffer(inputHex);
-      
       let results: ParsedField[] = [];
+      let ruleToUse = currentRule;
+
+      // Auto Detect Logic
+      if (!ruleToUse) {
+        const match = findMatchingTemplate(inputHex, templates, rules);
+        if (match) {
+            ruleToUse = match.rule;
+            setMatchedTemplateName(match.template.name);
+            // Optional: We could set selectedProtocolId to match.rule.id 
+            // but user might want to keep "Auto" selected.
+            // Let's just use it for this parse.
+        } else {
+            throw new Error('未能自动匹配到合适的协议模版 (No matching template found)');
+        }
+      }
       
-      if (currentRule.type === 'stun') {
+      if (ruleToUse.type === 'stun') {
         results = parseStun(buffer);
-      } else if (currentRule.type === 'custom') {
+      } else if (ruleToUse.type === 'custom') {
         const engine = new ParserEngine(enums);
-        results = engine.parse(buffer, currentRule);
+        results = engine.parse(buffer, ruleToUse);
+      } else if (ruleToUse.id === 'custom_demo') {
+         // Demo rule handling
+         const engine = new ParserEngine(enums);
+         results = engine.parse(buffer, ruleToUse);
       } else {
         setError('Protocol not implemented yet');
         return;
@@ -90,10 +108,16 @@ const ParserView = () => {
       setParsedResults(results);
     } catch (err: any) {
       setError(err.message);
+      setParsedResults([]);
     }
   };
 
   const loadSample = async () => {
+    if (!currentRule) {
+        setError("请先选择一个协议以加载示例 (Please select a protocol first)");
+        return;
+    }
+
     // 1. Use saved sample if available - SHOW OPTIONS
     if (currentRule.sampleHex) {
         setShowLoadOption(true);
@@ -121,7 +145,7 @@ const ParserView = () => {
   };
 
   const handleUseSavedSample = () => {
-      if (currentRule.sampleHex) {
+      if (currentRule?.sampleHex) {
           setInputHex(currentRule.sampleHex);
       }
       setShowLoadOption(false);
@@ -133,6 +157,7 @@ const ParserView = () => {
   };
 
   const handleGeneratedSample = async (values: Record<string, any>) => {
+      if (!currentRule) return;
       try {
           const hex = PacketBuilder.build(currentRule, values);
           setInputHex(hex);
@@ -167,6 +192,8 @@ const ParserView = () => {
         const buffer = hexToBuffer(hex);
         let results: ParsedField[] = [];
         
+        if (!currentRule) return;
+
         if (currentRule.type === 'stun') {
           results = parseStun(buffer);
         } else if (currentRule.type === 'custom') {
@@ -199,6 +226,8 @@ const ParserView = () => {
     setShowSampleInput(false);
     setShowSaveConfirm(false);
     
+    if (!currentRule) return;
+
     try {
         const updatedRules = rules.map(r => 
             r.id === currentRule.id ? { ...r, sampleHex: formatted } : r
@@ -236,6 +265,7 @@ const ParserView = () => {
             value={selectedProtocolId}
             onChange={(e) => setSelectedProtocolId(e.target.value)}
           >
+            <option value="">自动识别 (Auto Detect)</option>
             <optgroup label="内置/演示">
                 <option value="custom_demo">演示协议</option>
                 <option value="stun">STUN (RFC 5389)</option>
@@ -256,6 +286,8 @@ const ParserView = () => {
         <button 
           onClick={loadSample}
           className="text-xs text-primary hover:underline"
+          disabled={!currentRule} // Disable if no rule selected (Auto mode)
+          title={!currentRule ? "请先选择协议" : ""}
         >
           加载示例
         </button>
@@ -272,7 +304,7 @@ const ParserView = () => {
                 <Copy className="w-4 h-4" />
               </button>
               {/* Only show Save for custom user rules, not static ones */}
-              {rules.some(r => r.id === currentRule.id) && (
+              {currentRule && rules.some(r => r.id === currentRule.id) && (
                 <button onClick={handleSaveBtnClick} className="p-1 hover:bg-accent rounded" title="保存为示例">
                   <Save className="w-4 h-4" />
                 </button>
@@ -311,12 +343,20 @@ const ParserView = () => {
           <div className="flex justify-between items-center h-8">
             <h3 className="font-semibold text-sm">解析结果</h3>
           </div>
+          {matchedTemplateName && (
+             <div className="flex items-center gap-2 mb-2 px-1">
+               <span className="text-xs text-muted-foreground">已匹配模版:</span>
+               <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">
+                 {matchedTemplateName}
+               </span>
+             </div>
+          )}
           <div className="flex-1 min-h-0 overflow-auto">
             {parsedResults.length > 0 ? (
               <ParsedResultTable data={parsedResults} />
             ) : (
               <div className="h-full border rounded-md flex items-center justify-center text-muted-foreground text-sm bg-secondary/10">
-                等待解析...
+                {error ? '解析失败' : '等待解析...'}
               </div>
             )}
           </div>
@@ -324,7 +364,7 @@ const ParserView = () => {
       </div>
 
       {/* Sample Input Modal */}
-      {showSampleInput && (
+      {showSampleInput && currentRule && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-card border shadow-lg rounded-lg p-6 w-[400px] space-y-4">
             <h3 className="font-semibold">保存十六进制示例</h3>
@@ -357,7 +397,7 @@ const ParserView = () => {
       )}
 
       {/* Load Option Modal */}
-      {showLoadOption && (
+      {showLoadOption && currentRule && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-card border shadow-lg rounded-lg p-6 w-[400px] space-y-4">
             <h3 className="font-semibold">加载示例</h3>
@@ -389,7 +429,7 @@ const ParserView = () => {
       )}
 
       {/* Save Confirmation Modal */}
-      {showSaveConfirm && (
+      {showSaveConfirm && currentRule && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-card border shadow-lg rounded-lg p-6 w-[400px] space-y-4">
             <h3 className="font-semibold">确认保存</h3>
@@ -417,7 +457,7 @@ const ParserView = () => {
       )}
 
       {/* Generator Modal */}
-      {showGenerator && (
+      {showGenerator && currentRule && (
         <SampleGeneratorModal
             rule={currentRule}
             enums={enums}
